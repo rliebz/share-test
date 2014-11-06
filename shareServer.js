@@ -11,7 +11,9 @@ var express = require('express');
 var server = express();
 
 // Serve static files
-server.use(express.static(sharejs.scriptsDir));
+server.use(express.static(sharejs.scriptsDir));     // Sharejs
+server.use(express.static(__dirname + '/public'));  // index.html and Ace wrapper
+server.use(express.static(__dirname + '/node_modules/ace-builds')); // Ace
 
 server.use(browserChannel(function(client) {
 
@@ -40,11 +42,8 @@ server.use(browserChannel(function(client) {
 
   // Give the stream to sharejs
   return share.listen(stream);
-}));
 
-server.get('/', function(req, res) {
-    res.sendfile('index.html');
-});
+}));
 
 port = 7007;
 server.listen(port, function() {

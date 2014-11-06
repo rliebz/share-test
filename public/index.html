@@ -1,0 +1,44 @@
+<!-- The no conflict build of ace.js must be used to avoid namespace issues-->
+<script src="/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+
+<!--The editor won't display unless you specify a height.-->
+<style type="text/css" media="screen">
+    #editor {
+        position: relative;
+        height: 300px;
+        width: 600px;
+    }
+</style>
+
+<div id="editor">Loading...</div>
+
+<!-- These will be served using express -->
+<script src="http://localhost:7007/channel/bcsocket.js"></script>
+<script src="http://localhost:7007/text.js"></script>
+<script src="http://localhost:7007/share.uncompressed.js"></script>
+<script src="http://localhost:7007/ace.js"></script>
+
+<script>
+
+    var editor = ace.edit("editor");
+    editor.getSession().setMode("ace/mode/markdown");
+
+    var socket = new BCSocket(null, {reconnect: true});
+    var sjs = new sharejs.Connection(socket);
+
+    var doc = sjs.get('docs', 'hello');
+
+    // Subscribe to changes
+    doc.subscribe();
+
+    // This will be called when we have a live copy of the server's data.
+    doc.whenReady(function() {
+      console.log('doc ready, data: ', doc.getSnapshot());
+
+      // Create a text document if one does not exist
+      if (!doc.type) doc.create('text');
+
+      doc.attachAce(editor);
+    });
+
+</script>
