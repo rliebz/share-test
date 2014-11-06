@@ -33,6 +33,13 @@
 
     // This will be called when we have a live copy of the server's data.
     doc.whenReady(function() {
+
+      // Send user metadata
+      socket.send({
+          registration: true,
+          username: 'Robert Liebowitz'
+      });
+
       console.log('doc ready, data: ', doc.getSnapshot());
 
       // Create a text document if one does not exist

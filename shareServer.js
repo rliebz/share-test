@@ -15,6 +15,8 @@ server.use(express.static(sharejs.scriptsDir));     // Sharejs
 server.use(express.static(__dirname + '/public'));  // index.html and Ace wrapper
 server.use(express.static(__dirname + '/node_modules/ace-builds')); // Ace
 
+var users = 0;
+
 server.use(browserChannel(function(client) {
 
   var stream = new Duplex({objectMode: true});
@@ -28,10 +30,20 @@ server.use(browserChannel(function(client) {
   };
 
   client.on('message', function(data) {
-    stream.push(data);
+    // Handle our custom messages separately
+    if (data.registration) {
+        users += 1;
+        client.userMeta = data; // Attach metadata to the client object
+        console.log('new user:', data.username, '| Total: ', users);
+    } else {
+        stream.push(data);
+    }
   });
 
+  // Called 20-30 seconds after the socket is closed
   client.on('close', function(reason) {
+    users -= 1;
+    console.log("removed user", client.userMeta.username, "| Total:", users);
     stream.push(null);
     stream.emit('close');
   });
