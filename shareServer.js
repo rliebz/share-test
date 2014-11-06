@@ -1,5 +1,6 @@
 var livedb = require('livedb');
-var backend = livedb.client(livedb.memory());
+var mongo = require('livedb-mongo')('mongodb://localhost:27017/sharejstest', {safe:true});
+var backend = livedb.client(mongo);
 
 var sharejs = require('share');
 var share = sharejs.server.createClient({backend: backend});
