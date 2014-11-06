@@ -1,5 +1,13 @@
+var port = 7007;
+var dbHost = 'localhost';
+var dbPort = 27017;
+var dbName = 'sharejstest';
+
 var livedb = require('livedb');
-var mongo = require('livedb-mongo')('mongodb://localhost:27017/sharejstest', {safe:true});
+var mongo = require('livedb-mongo')(
+    'mongodb://' + dbHost + ':' + dbPort + '/' + dbName,
+    {safe:true}
+);
 var backend = livedb.client(mongo);
 
 var sharejs = require('share');
@@ -58,7 +66,6 @@ server.use(browserChannel(function(client) {
 
 }));
 
-port = 7007;
 server.listen(port, function() {
     console.log('Server running at http://127.0.0.1:' + port);
 });
