@@ -28,11 +28,8 @@
 
     var doc = sjs.get('docs', 'hello');
 
-    // Subscribe to changes
-    doc.subscribe();
-
-    // This will be called when we have a live copy of the server's data.
-    doc.whenReady(function() {
+    // This will be called on both connect and reconnect
+    doc.on('subscribe', function() {
 
       // Send user metadata
       socket.send({
@@ -40,12 +37,21 @@
           username: 'Robert Liebowitz'
       });
 
+    });
+
+    // This will be called when we have a live copy of the server's data.
+    doc.whenReady(function() {
+
       console.log('doc ready, data: ', doc.getSnapshot());
 
       // Create a text document if one does not exist
       if (!doc.type) doc.create('text');
 
       doc.attachAce(editor);
+
     });
+
+    // Subscribe to changes
+    doc.subscribe();
 
 </script>

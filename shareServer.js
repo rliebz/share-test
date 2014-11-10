@@ -26,43 +26,49 @@ server.use(express.static(__dirname + '/node_modules/ace-builds')); // Ace
 
 var users = 0;
 
-server.use(browserChannel(function(client) {
+server.use(browserChannel(
+    {sessionTimeoutInterval: 5000},
+    function(client) {
 
-  var stream = new Duplex({objectMode: true});
+    var stream = new Duplex({objectMode: true});
 
-  stream._read = function() {};
-  stream._write = function(chunk, encoding, callback) {
-    if (client.state !== 'closed') {
-      client.send(chunk);
-    }
-    callback();
-  };
+    stream._read = function() {};
+    stream._write = function(chunk, encoding, callback) {
+        if (client.state !== 'closed') {
+            client.send(chunk);
+        }
+        callback();
+    };
 
-  client.on('message', function(data) {
-    // Handle our custom messages separately
-    if (data.registration) {
-        users += 1;
-        client.userMeta = data; // Attach metadata to the client object
-        console.log('new user:', data.username, '| Total: ', users);
-    } else {
-        stream.push(data);
-    }
-  });
+    client.on('open', function(data) {
+        console.log('opened', data);
+    });
 
-  // Called 20-30 seconds after the socket is closed
-  client.on('close', function(reason) {
-    users -= 1;
-    console.log("removed user", client.userMeta.username, "| Total:", users);
-    stream.push(null);
-    stream.emit('close');
-  });
+    client.on('message', function(data) {
+        // Handle our custom messages separately
+        if (data.registration) {
+            users += 1;
+            client.userMeta = data; // Attach metadata to the client object
+            console.log('new user:', data.username, '| Total:', users);
+        } else {
+            stream.push(data);
+        }
+    });
 
-  stream.on('end', function() {
-    client.close();
-  });
+    // Called 20-30 seconds after the socket is closed
+    client.on('close', function(reason) {
+        users -= 1;
+        console.log('rem user:', client.userMeta.username, '| Total:', users);
+        stream.push(null);
+        stream.emit('close');
+    });
 
-  // Give the stream to sharejs
-  return share.listen(stream);
+    stream.on('end', function() {
+        client.close();
+    });
+
+    // Give the stream to sharejs
+    return share.listen(stream);
 
 }));
 
